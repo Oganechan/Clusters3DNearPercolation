@@ -8,6 +8,6 @@
         "initial_concentration": 0.0,
         "final_concentration": 1.0,
         "concentration_step": 0.01,
-        "num_configurations": 100
+        "num_configurations": 10
     }
 }
