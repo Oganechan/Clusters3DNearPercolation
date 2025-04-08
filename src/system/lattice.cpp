@@ -54,7 +54,7 @@ void Lattice::replace_random_spins(int non_magnetic_count)
     for (int i = 0; i < non_magnetic_count && !ferro_indices_vec_.empty(); ++i)
     {
         std::uniform_int_distribution<size_t> dist(0, ferro_indices_vec_.size() - 1);
-        size_t random_index = dist(rng_);
+        size_t random_index = dist(get_rng());
         spin_values_vec_.at(ferro_indices_vec_.at(random_index)) = 0;
         ferro_indices_vec_.erase(ferro_indices_vec_.begin() + random_index);
     }
@@ -77,7 +77,7 @@ std::array<int, 3> Lattice::get_random_coordinates() const
         throw std::runtime_error("No magnetic spins available");
 
     std::uniform_int_distribution<size_t> dist(0, ferro_indices_vec_.size() - 1);
-    int index = ferro_indices_vec_[dist(rng_)];
+    int index = ferro_indices_vec_[dist(get_rng())];
 
     return get_coordinates_via_index(index);
 }

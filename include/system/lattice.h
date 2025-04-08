@@ -10,17 +10,13 @@
 class Lattice
 {
 public:
-    Lattice(std::string crystal_type,
-            std::vector<int> initial_spin_values_vec = {},
-            std::vector<int> initial_ferro_indices_vec = {})
+    Lattice(std::string crystal_type)
         : lattice_size_(CFG.lattice_size()),
-          lattice_area_(CFG.lattice_area()),
-          lattice_volume_(CFG.lattice_volume()),
           n_layers_(CFG.n_layers()),
+          lattice_area_(lattice_size_ * lattice_size_),
+          lattice_volume_(lattice_area_ * n_layers_),
           crystal_type_string_(crystal_type),
-          boundary_conditions_(CFG.get<std::string>("lattice.boundary_conditions") == "hard"),
-          spin_values_vec_(initial_spin_values_vec),
-          ferro_indices_vec_(initial_ferro_indices_vec) {}
+          boundary_conditions_(CFG.get<std::string>("lattice.boundary_conditions") == "hard") { cached_neighbors_ = generate_neighbors(); }
 
     void initialize();
     void replace_spin_via_index(int index);
@@ -32,8 +28,6 @@ public:
 
     const std::vector<std::vector<int>> &neighbors() const
     {
-        if (cached_neighbors_.empty())
-            cached_neighbors_ = generate_neighbors();
         return cached_neighbors_;
     }
 
@@ -56,8 +50,13 @@ private:
     std::vector<int> parent_;
     std::vector<int> cluster_size_;
 
-    mutable std::mt19937 rng_{std::random_device{}()};
     mutable std::vector<std::vector<int>> cached_neighbors_;
+
+    static std::mt19937 &get_rng()
+    {
+        thread_local std::mt19937 rng(std::random_device{}());
+        return rng;
+    }
 
     std::vector<std::vector<int>> generate_neighbors() const;
 
