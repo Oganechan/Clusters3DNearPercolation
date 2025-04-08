@@ -1,0 +1,13 @@
+{
+    "lattice": {
+        "size": 20,
+        "n_layers": 20,
+        "boundary_conditions": "periodic"
+    },
+    "simulation": {
+        "initial_concentration": 0.0,
+        "final_concentration": 1.0,
+        "concentration_step": 0.01,
+        "num_configurations": 100
+    }
+}
