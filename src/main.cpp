@@ -53,6 +53,8 @@ int main(int argc, char **argv)
             long total_clusters = 0;
             for (int configuration = 0; configuration < CFG.get<int>("simulation.num_configurations"); ++configuration)
             {
+                std::cout << "\033[2K\rConfiguration: " << configuration + 1 << " of "
+                          << CFG.get<int>("simulation.num_configurations") << std::flush;
                 sc_lattice.initialize();
                 sc_lattice.replace_random_spins(non_magnetic_count);
                 auto clusters = sc_lattice.find_clusters();
@@ -62,6 +64,7 @@ int main(int argc, char **argv)
                         ++multi_atom_clusters_count;
                 total_clusters += multi_atom_clusters_count;
             }
+            std::cout << std::endl;
             average_cluster_counts.push_back(total_clusters / CFG.get<int>("simulation.num_configurations"));
         }
         std::ofstream sc_output_file("../data/output/clusters_sc.txt");
@@ -93,6 +96,8 @@ int main(int argc, char **argv)
             long total_clusters = 0;
             for (int configuration = 0; configuration < CFG.get<int>("simulation.num_configurations"); ++configuration)
             {
+                std::cout << "\033[2K\rConfiguration: " << configuration + 1 << " of "
+                          << CFG.get<int>("simulation.num_configurations") << std::flush;
                 bcc_lattice.initialize();
                 bcc_lattice.replace_random_spins(non_magnetic_count);
                 auto clusters = bcc_lattice.find_clusters();
@@ -102,6 +107,7 @@ int main(int argc, char **argv)
                         ++multi_atom_clusters_count;
                 total_clusters += multi_atom_clusters_count;
             }
+            std::cout << std::endl;
             average_cluster_counts.push_back(total_clusters / CFG.get<int>("simulation.num_configurations"));
         }
         std::ofstream bcc_output_file("../data/output/clusters_bcc.txt");
@@ -133,6 +139,8 @@ int main(int argc, char **argv)
             long total_clusters = 0;
             for (int configuration = 0; configuration < CFG.get<int>("simulation.num_configurations"); ++configuration)
             {
+                std::cout << "\033[2K\rConfiguration: " << configuration + 1 << " of "
+                          << CFG.get<int>("simulation.num_configurations") << std::flush;
                 fcc_lattice.initialize();
                 fcc_lattice.replace_random_spins(non_magnetic_count);
                 auto clusters = fcc_lattice.find_clusters();
@@ -142,6 +150,7 @@ int main(int argc, char **argv)
                         ++multi_atom_clusters_count;
                 total_clusters += multi_atom_clusters_count;
             }
+            std::cout << std::endl;
             average_cluster_counts.push_back(total_clusters / CFG.get<int>("simulation.num_configurations"));
         }
         std::ofstream fcc_output_file("../data/output/clusters_fcc.txt");
