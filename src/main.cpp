@@ -38,6 +38,7 @@ int main(int argc, char **argv)
     }
 
     std::vector<long double> average_cluster_counts;
+    std::vector<long double> average_cluster_size;
 
     auto simulate_lattice = [&](const std::string &lattice_name)
     {
@@ -54,6 +55,7 @@ int main(int argc, char **argv)
         {
             int non_magnetic_count = std::ceil((1 - concentration) * lattice_volume);
             long total_clusters = 0;
+            long total_clusters_size = 0;
 
             for (int configuration = 0; configuration < num_configuration; ++configuration)
             {
@@ -64,23 +66,28 @@ int main(int argc, char **argv)
                 auto clusters = lattice.find_clusters();
 
                 total_clusters += clusters.size();
+                for (const auto &cluster : clusters)
+                    total_clusters_size += cluster.size();
             }
             std::cout << "\n";
-            average_cluster_counts.push_back(total_clusters / num_configuration);
+            average_cluster_counts.push_back(static_cast<long double>(total_clusters) / num_configuration);
+            average_cluster_size.push_back(static_cast<long double>(total_clusters_size) / (total_clusters ? total_clusters : 1));
         }
 
-        std::ofstream sc_output_file("../data/output/clusters_" + lattice_name + ".txt");
-        if (sc_output_file.is_open())
+        std::ofstream output_file("../data/output/clusters_" + lattice_name + ".txt");
+        if (output_file.is_open())
         {
-            for (const auto &avg_count : average_cluster_counts)
-                sc_output_file << avg_count << "\n";
-            sc_output_file.close();
+            for (int i = 0; i < average_cluster_counts.size(); ++i)
+                output_file << average_cluster_counts[i] << "\t" << average_cluster_size[i] << "\n";
+            output_file.close();
             std::cout << "Data saved" << std::endl;
         }
         else
             std::cerr << "Failed to open file" << std::endl;
         std::cout << std::endl;
+
         average_cluster_counts.clear();
+        average_cluster_size.clear();
     };
 
     if (lattice_type == "SC" || lattice_type == "ALL")
