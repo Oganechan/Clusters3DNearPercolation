@@ -3,10 +3,17 @@
 // Creates a system completely filled with magnetic (1) spins
 void Lattice::initialize()
 {
-    spin_values_vec_.assign(lattice_volume_, 1);
+    spin_values_vec_.clear();
     ferro_indices_vec_.clear();
+    parent_.clear();
+    rank_.clear();
+
+    std::bernoulli_distribution dist(0.5);
     for (uint32_t i = 0; i < lattice_volume_; ++i)
+    {
+        spin_values_vec_.push_back(dist(get_rng()) ? 1 : -1);
         ferro_indices_vec_.push_back(i);
+    }
 }
 
 // Replaces random magnetic spins with non-magnetic (0) spins
@@ -94,18 +101,13 @@ std::vector<std::vector<uint32_t>> Lattice::generate_neighbors() const
 
 uint32_t Lattice::find(uint32_t index)
 {
-    uint32_t root = index;
-
-    while (parent_[root] != root)
-        root = parent_[root];
-
-    while (index != root)
+    while(parent_[index] != index)
     {
-        uint32_t next = parent_[index];
-        parent_[index] = root;
-        index = next;
+        parent_[index] = parent_[parent_[index]];
+        index = parent_[index];
     }
-    return root;
+    
+    return index;
 }
 
 void Lattice::union_clusters(uint32_t a, uint32_t b)
@@ -138,32 +140,27 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
     rank_.clear();
     rank_.resize(lattice_volume_);
 
-    for (uint32_t i = 0; i < lattice_volume_; ++i)
+    for (const auto &index : ferro_indices_vec_)
     {
-        parent_[i] = i;
-        rank_[i] = (spin_values_vec_[i] == 0) ? 0 : 1;
+        parent_[index] = index;
+        rank_[index] = 1;
     }
 
     const auto &neighbors_vec = neighbors();
 
-    for (uint32_t index = 0; index < lattice_volume_; ++index)
-        if (spin_values_vec_[index] != 0)
-            for (const auto &neighbor_index : neighbors_vec[index])
-                if (spin_values_vec_[neighbor_index] != 0)
-                    union_clusters(index, neighbor_index);
-    
+    for (const auto &index : ferro_indices_vec_)
+        for (const auto &neighbor_index : neighbors_vec[index])
+            if (spin_values_vec_[neighbor_index] != 0 && spin_values_vec_[index] == spin_values_vec_[neighbor_index])
+                union_clusters(index, neighbor_index);
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> cluster_map;
-
-    for (uint32_t index = 0; index < lattice_volume_; ++index)
-        if (spin_values_vec_[index] != 0)
-        {
-            uint32_t parent = find(index);
-            cluster_map[parent].push_back(index);
-        }
+    for (const auto &index : ferro_indices_vec_)
+    {
+        uint32_t parent = find(index);
+        cluster_map[parent].push_back(index);
+    }
 
     std::vector<std::vector<uint32_t>> clusters;
-
     for (auto &[parent, indices] : cluster_map)
         clusters.push_back(std::move(indices));
 
