@@ -3,10 +3,15 @@
 // Creates a system completely filled with magnetic (1) spins
 void Lattice::initialize()
 {
-    spin_values_vec_.assign(lattice_volume_, 1);
+    spin_values_vec_.clear();
     ferro_indices_vec_.clear();
+
+    std::bernoulli_distribution dist(0.5);
     for (uint32_t i = 0; i < lattice_volume_; ++i)
+    {
+        spin_values_vec_.push_back(dist(get_rng()) ? 1 : -1);
         ferro_indices_vec_.push_back(i);
+    }
 }
 
 // Replaces random magnetic spins with non-magnetic (0) spins
@@ -149,7 +154,6 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
             for (const auto &neighbor_index : neighbors_vec[index])
                 if (spin_values_vec_[neighbor_index] != 0)
                     union_clusters(index, neighbor_index);
-    
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> cluster_map;
 
