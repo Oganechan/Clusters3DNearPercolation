@@ -101,18 +101,13 @@ std::vector<std::vector<uint32_t>> Lattice::generate_neighbors() const
 
 uint32_t Lattice::find(uint32_t index)
 {
-    uint32_t root = index;
-
-    while (parent_[root] != root)
-        root = parent_[root];
-
-    while (index != root)
+    while(parent_[index] != index)
     {
-        uint32_t next = parent_[index];
-        parent_[index] = root;
-        index = next;
+        parent_[index] = parent_[parent_[index]];
+        index = parent_[index];
     }
-    return root;
+    
+    return index;
 }
 
 void Lattice::union_clusters(uint32_t a, uint32_t b)
@@ -153,11 +148,10 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
 
     for (const auto &index : ferro_indices_vec_)
         for (const auto &neighbor_index : neighbors_vec[index])
-            if (spin_values_vec_[neighbor_index] != 0)
+            if (spin_values_vec_[neighbor_index] != 0 && spin_values_vec_[index] == spin_values_vec_[neighbor_index])
                 union_clusters(index, neighbor_index);
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> cluster_map;
-
     for (const auto &index : ferro_indices_vec_)
     {
         uint32_t parent = find(index);
@@ -165,7 +159,6 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
     }
 
     std::vector<std::vector<uint32_t>> clusters;
-
     for (auto &[parent, indices] : cluster_map)
         clusters.push_back(std::move(indices));
 
