@@ -143,10 +143,10 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
     parent_.resize(lattice_volume_);
     rank_.resize(lattice_volume_);
 
-    for ( const auto &i : ferro_indices_vec_)
+    for (const auto &index : ferro_indices_vec_)
     {
-        parent_[i] = i;
-        rank_[i] = (spin_values_vec_[i] == 0) ? 0 : 1;
+        parent_[index] = index;
+        rank_[index] = 1;
     }
 
     const auto &neighbors_vec = neighbors();
@@ -159,10 +159,10 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
     std::unordered_map<uint32_t, std::vector<uint32_t>> cluster_map;
 
     for (const auto &index : ferro_indices_vec_)
-        {
-            uint32_t parent = find(index);
-            cluster_map[parent].push_back(index);
-        }
+    {
+        uint32_t parent = find(index);
+        cluster_map[parent].push_back(index);
+    }
 
     std::vector<std::vector<uint32_t>> clusters;
 
