@@ -135,9 +135,7 @@ void Lattice::union_clusters(uint32_t a, uint32_t b)
 
 std::vector<std::vector<uint32_t>> Lattice::find_clusters()
 {
-    parent_.clear();
     parent_.resize(lattice_volume_);
-    rank_.clear();
     rank_.resize(lattice_volume_);
 
     for (const auto &index : ferro_indices_vec_)
