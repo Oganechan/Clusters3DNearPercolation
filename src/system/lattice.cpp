@@ -5,6 +5,8 @@ void Lattice::initialize()
 {
     spin_values_vec_.clear();
     ferro_indices_vec_.clear();
+    parent_.clear();
+    rank_.clear();
 
     std::bernoulli_distribution dist(0.5);
     for (uint32_t i = 0; i < lattice_volume_; ++i)
@@ -141,7 +143,7 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
     parent_.resize(lattice_volume_);
     rank_.resize(lattice_volume_);
 
-    for (uint32_t i = 0; i < lattice_volume_; ++i)
+    for ( const auto &i : ferro_indices_vec_)
     {
         parent_[i] = i;
         rank_[i] = (spin_values_vec_[i] == 0) ? 0 : 1;
@@ -149,16 +151,14 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
 
     const auto &neighbors_vec = neighbors();
 
-    for (uint32_t index = 0; index < lattice_volume_; ++index)
-        if (spin_values_vec_[index] != 0)
-            for (const auto &neighbor_index : neighbors_vec[index])
-                if (spin_values_vec_[neighbor_index] != 0)
-                    union_clusters(index, neighbor_index);
+    for (const auto &index : ferro_indices_vec_)
+        for (const auto &neighbor_index : neighbors_vec[index])
+            if (spin_values_vec_[neighbor_index] != 0)
+                union_clusters(index, neighbor_index);
 
     std::unordered_map<uint32_t, std::vector<uint32_t>> cluster_map;
 
-    for (uint32_t index = 0; index < lattice_volume_; ++index)
-        if (spin_values_vec_[index] != 0)
+    for (const auto &index : ferro_indices_vec_)
         {
             uint32_t parent = find(index);
             cluster_map[parent].push_back(index);
