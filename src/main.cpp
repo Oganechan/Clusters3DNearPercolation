@@ -74,7 +74,7 @@ int main(int argc, char **argv)
             average_cluster_size.push_back(static_cast<long double>(total_clusters_size) / (total_clusters ? total_clusters : 1));
         }
 
-        std::ofstream output_file("../data/output/clusters_" + lattice_name + ".txt");
+        std::ofstream output_file("../data/output_txt/clusters_" + lattice_name + ".txt");
         if (output_file.is_open())
         {
             double concentration = initial_concentration;
