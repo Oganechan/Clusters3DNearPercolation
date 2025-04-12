@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     }
     catch (const std::runtime_error &err)
     {
-        std::cerr << err.what() << std::endl;
+        std::cerr << err.what() << "\n";
         std::cerr << program;
         return 1;
     }
@@ -42,16 +42,17 @@ int main(int argc, char **argv)
 
     auto simulate_lattice = [&](const std::string &lattice_name)
     {
-        std::cout << "Lattice type is " << lattice_name << "\n";
+        std::cout << "Lattice type is " << lattice_name << std::endl;
 
         Lattice lattice(lattice_name);
-        double initial_concentration = CFG.get<double>("simulation.initial_concentration");
-        double final_concentration = CFG.get<double>("simulation.final_concentration");
-        double concentration_step = CFG.get<double>("simulation.concentration_step");
-        int num_configuration = CFG.get<int>("simulation.num_configurations");
-        int lattice_volume = CFG.lattice_volume();
+        const double initial_concentration = CFG.get<double>("simulation.initial_concentration");
+        const double final_concentration = CFG.get<double>("simulation.final_concentration");
+        const double concentration_step = CFG.get<double>("simulation.concentration_step");
+        const int num_configuration = CFG.get<int>("simulation.num_configurations");
+        const int lattice_volume = CFG.lattice_volume();
+        const int progres_step = num_configuration / 100;
 
-        for (double concentration = initial_concentration; concentration <= final_concentration; concentration += concentration_step)
+        for (double concentration = initial_concentration; concentration <= final_concentration + 1e-3; concentration += concentration_step)
         {
             int non_magnetic_count = std::ceil((1 - concentration) * lattice_volume);
             long total_clusters = 0;
@@ -59,8 +60,12 @@ int main(int argc, char **argv)
 
             for (int configuration = 0; configuration < num_configuration; ++configuration)
             {
-                std::cout << "\rConcentration: " << concentration << "\t|\tConfig:" << configuration + 1 << "/" << num_configuration << std::flush;
-
+                if (configuration % progres_step == 0 || configuration == num_configuration - 1)
+                {
+                    int persent = (configuration * 100) / (num_configuration - 1);
+                    std::cout << "\rConcentration: " << concentration
+                              << " | Completed: " << persent << "%   " << std::flush;
+                }
                 lattice.initialize();
                 lattice.replace_random_spins(non_magnetic_count);
                 auto clusters = lattice.find_clusters();
@@ -69,11 +74,11 @@ int main(int argc, char **argv)
                 for (const auto &cluster : clusters)
                     total_clusters_size += cluster.size();
             }
-            std::cout << "\n";
+
             average_cluster_counts.push_back(static_cast<long double>(total_clusters) / num_configuration);
             average_cluster_size.push_back(static_cast<long double>(total_clusters_size) / (total_clusters ? total_clusters : 1));
         }
-
+        std::cout << std::endl;
         std::ofstream output_file("../data/output_txt/clusters_" + lattice_name + ".txt");
         if (output_file.is_open())
         {
