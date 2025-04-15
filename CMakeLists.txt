@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SRC_FILES
-    src/config/config.cpp
-    src/system/lattice.cpp
+    src/config.cpp
+    src/lattice.cpp
 )
 
 include(FetchContent)
@@ -32,7 +32,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${nlohmann_json_SOURCE_DIR}/include
     ${argparse_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
