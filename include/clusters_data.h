@@ -19,12 +19,12 @@ struct ClustersData
     void update(const std::vector<std::vector<uint32_t>> &all,
                 const std::vector<std::vector<uint32_t>> &up,
                 const std::vector<std::vector<uint32_t>> &down,
-                const std::vector<std::vector<uint32_t>> &percolating)
+                const std::vector<std::vector<uint32_t>> &percolation)
     {
         total_clusters += all.size();
         total_up_clusters += up.size();
-        total_up_clusters += up.size();
-        total_perc_clusters += percolating.size();
+        total_down_clusters += down.size();
+        total_perc_clusters += percolation.size();
 
         for (const auto &c : all)
             total_cluster_size += c.size();
@@ -32,8 +32,21 @@ struct ClustersData
             total_up_cluster_size += c.size();
         for (const auto &c : down)
             total_down_cluster_size += c.size();
-        for (const auto &c : percolating)
+        for (const auto &c : percolation)
             total_perc_cluster_size += c.size();
+    }
+
+    void reset()
+    {
+        total_clusters = 0;
+        total_up_clusters = 0;
+        total_down_clusters = 0;
+        total_perc_clusters = 0;
+
+        total_cluster_size = 0;
+        total_up_cluster_size = 0;
+        total_down_cluster_size = 0;
+        total_perc_cluster_size = 0;
     }
 
     double average_cluster_size() const
@@ -50,7 +63,7 @@ struct ClustersData
     }
     double average_percolating_cluster_size() const
     {
-        return total_perc_clusters ? total_perc_cluster_size / total_perc_cluster_size : 0.0;
+        return total_perc_clusters ? total_perc_cluster_size / total_perc_clusters : 0.0;
     }
 };
 

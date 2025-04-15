@@ -33,6 +33,7 @@ public:
     }
 
     std::array<std::vector<std::vector<uint32_t>>, 4> find_clusters();
+    void wolf(double temperature);
 
 private:
     const uint16_t lattice_size_;

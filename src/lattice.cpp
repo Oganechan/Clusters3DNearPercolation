@@ -203,7 +203,7 @@ std::array<std::vector<std::vector<uint32_t>>, 4> Lattice::find_clusters()
 
     for (const auto &cluster : clusters_all)
     {
-        if (spin_values_vec_[cluster[0]])
+        if (spin_values_vec_[cluster[0]] == 1)
         {
             clusters_up.push_back(cluster);
         }
@@ -219,4 +219,43 @@ std::array<std::vector<std::vector<uint32_t>>, 4> Lattice::find_clusters()
     }
 
     return {clusters_all, clusters_up, clusters_down, clusters_perc};
+}
+
+void Lattice::wolf(double temperature)
+{
+    if (ferro_indices_vec_.empty())
+        return;
+
+    std::uniform_int_distribution<uint32_t> dist_index(0, ferro_indices_vec_.size() - 1);
+    uint32_t start_index = ferro_indices_vec_[dist_index(get_rng())];
+    int8_t initial_spin = spin_values_vec_[start_index];
+
+    const double p_add = 1.0 - std::exp(-2 / temperature);
+    std::bernoulli_distribution dist_bernoulli(p_add);
+
+    const auto &neighbors_vec = neighbors();
+
+    std::vector<uint32_t> cluster;
+    std::vector<int8_t> is_cluster(lattice_volume_, 0);
+
+    cluster.push_back(start_index);
+    is_cluster[start_index] = 1;
+
+    for (size_t index = 0; index < cluster.size(); ++index)
+    {
+        uint32_t current = cluster[index];
+        for (const auto &neighbor_index : neighbors_vec[current])
+        {
+            if (!is_cluster[neighbor_index] && initial_spin == spin_values_vec_[neighbor_index] && dist_bernoulli(get_rng()))
+            {
+                cluster.push_back(neighbor_index);
+                is_cluster[neighbor_index] = 1;
+            }
+        }
+    }
+
+    for (const auto &index : cluster)
+    {
+        spin_values_vec_[index] *= -1;
+    }
 }

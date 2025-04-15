@@ -3,6 +3,7 @@
 #include <argparse/argparse.hpp>
 #include "include/config.h"
 #include "include/lattice.h"
+#include "include/clusters_data.h"
 
 int main(int argc, char **argv)
 {
@@ -42,18 +43,25 @@ int main(int argc, char **argv)
         std::cout << "Lattice type is " << lattice_name << std::endl;
 
         Lattice lattice(lattice_name);
+        const int lattice_volume = CFG.lattice_volume();
+
         const double initial_concentration = CFG.get<double>("simulation.initial_concentration");
         const double final_concentration = CFG.get<double>("simulation.final_concentration");
         const double concentration_step = CFG.get<double>("simulation.concentration_step");
+
         const int num_configuration = CFG.get<int>("simulation.num_configurations");
-        const int lattice_volume = CFG.lattice_volume();
+        const int num_mc_steps = CFG.get<int>("simulation.num_mc_steps");
         const int progres_step = num_configuration / 100;
+
+        const double temperature = CFG.get<double>("parameters.temperature");
+
+        ClustersData data;
+        std::ofstream output_file("../data/output_txt/clusters_" + lattice_name + ".txt");
 
         for (double concentration = initial_concentration; concentration <= final_concentration + 1e-3; concentration += concentration_step)
         {
             int non_magnetic_count = std::ceil((1 - concentration) * lattice_volume);
-            long total_clusters = 0;
-            long total_clusters_size = 0;
+            data.reset();
 
             for (int configuration = 0; configuration < num_configuration; ++configuration)
             {
@@ -63,16 +71,31 @@ int main(int argc, char **argv)
                     std::cout << "\rConcentration: " << concentration
                               << " | Completed: " << persent << "%   " << std::flush;
                 }
+
                 lattice.initialize();
                 lattice.replace_random_spins(non_magnetic_count);
-                auto clusters = lattice.find_clusters();
 
-                total_clusters += clusters.size();
-                for (const auto &cluster : clusters)
-                    total_clusters_size += cluster.size();
+                for (int mc_step = 0; mc_step < num_mc_steps; ++mc_step)
+                {
+                    lattice.wolf(temperature);
+                }
+
+                auto [clusters_all, clusters_up, clusters_down, clusters_percolation] = lattice.find_clusters();
+                data.update(clusters_all, clusters_up, clusters_down, clusters_percolation);
             }
+
+            output_file << concentration << "\t"
+                        << data.total_clusters / (double)num_configuration << "\t"
+                        << data.average_cluster_size() / lattice_volume << "\t"
+                        << data.total_up_clusters / (double)num_configuration << "\t"
+                        << data.average_cluster_up_size() / lattice_volume << "\t"
+                        << data.total_down_clusters / (double)num_configuration << "\t"
+                        << data.average_cluster_down_size() / lattice_volume << "\t"
+                        << data.total_perc_clusters / (double)num_configuration << "\t"
+                        << data.average_percolating_cluster_size() / lattice_volume << "\n";
         }
-        std::cout << std::endl;
+        std::cout << "\nData saved for " << lattice_name << " lattice!\n"
+                  << std::endl;
     };
 
     if (lattice_type == "SC" || lattice_type == "ALL")
