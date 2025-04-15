@@ -37,9 +37,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::vector<long double> average_cluster_counts;
-    std::vector<long double> average_cluster_size;
-
     auto simulate_lattice = [&](const std::string &lattice_name)
     {
         std::cout << "Lattice type is " << lattice_name << std::endl;
@@ -74,31 +71,8 @@ int main(int argc, char **argv)
                 for (const auto &cluster : clusters)
                     total_clusters_size += cluster.size();
             }
-
-            average_cluster_counts.push_back(static_cast<long double>(total_clusters) / num_configuration);
-            average_cluster_size.push_back(static_cast<long double>(total_clusters_size) / (total_clusters ? total_clusters : 1));
         }
         std::cout << std::endl;
-        std::ofstream output_file("../data/output_txt/clusters_" + lattice_name + ".txt");
-        if (output_file.is_open())
-        {
-            double concentration = initial_concentration;
-            for (int i = 0; i < average_cluster_counts.size(); ++i)
-            {
-                output_file << concentration << "\t"
-                            << average_cluster_counts[i] << "\t"
-                            << average_cluster_size[i] << "\n";
-                concentration += concentration_step;
-            }
-            output_file.close();
-            std::cout << "Data saved!" << std::endl;
-        }
-        else
-            std::cerr << "Failed to open file" << std::endl;
-        std::cout << std::endl;
-
-        average_cluster_counts.clear();
-        average_cluster_size.clear();
     };
 
     if (lattice_type == "SC" || lattice_type == "ALL")

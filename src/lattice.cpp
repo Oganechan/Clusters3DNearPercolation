@@ -99,14 +99,53 @@ std::vector<std::vector<uint32_t>> Lattice::generate_neighbors() const
     return joosky_neighbors_vec;
 }
 
+bool Lattice::is_cluster_percolation(const std::vector<uint32_t> &cluster)
+{
+    bool percolation_x = false, percolation_y = false, percolation_z = false;
+
+    bool touches_x_min = false, touches_x_max = false;
+    bool touches_y_min = false, touches_y_max = false;
+    bool touches_z_min = false, touches_z_max = false;
+
+    if (cluster.size() < lattice_size_)
+        return false;
+    for (const auto &index : cluster)
+    {
+        auto [x, y, z] = get_coordinates_via_index(index);
+
+        if (x == 0)
+            touches_x_min = true;
+        else if (x == lattice_size_ - 1)
+            touches_x_max = true;
+
+        if (y == 0)
+            touches_y_min = true;
+        else if (y == lattice_size_ - 1)
+            touches_y_max = true;
+
+        if (z == 0)
+            touches_z_min = true;
+        else if (z == n_layers_ - 1)
+            touches_z_max = true;
+
+        percolation_x = touches_x_min && touches_x_max;
+        percolation_y = touches_y_min && touches_y_max;
+        percolation_z = touches_z_min && touches_z_max;
+
+        if (percolation_x || percolation_y || percolation_z)
+            return true;
+    }
+    return false;
+}
+
 uint32_t Lattice::find(uint32_t index)
 {
-    while(parent_[index] != index)
+    while (parent_[index] != index)
     {
         parent_[index] = parent_[parent_[index]];
         index = parent_[index];
     }
-    
+
     return index;
 }
 
@@ -133,7 +172,7 @@ void Lattice::union_clusters(uint32_t a, uint32_t b)
     }
 }
 
-std::vector<std::vector<uint32_t>> Lattice::find_clusters()
+std::array<std::vector<std::vector<uint32_t>>, 4> Lattice::find_clusters()
 {
     parent_.resize(lattice_volume_);
     rank_.resize(lattice_volume_);
@@ -158,9 +197,26 @@ std::vector<std::vector<uint32_t>> Lattice::find_clusters()
         cluster_map[parent].push_back(index);
     }
 
-    std::vector<std::vector<uint32_t>> clusters;
+    std::vector<std::vector<uint32_t>> clusters_all, clusters_up, clusters_down, clusters_perc;
     for (auto &[parent, indices] : cluster_map)
-        clusters.push_back(std::move(indices));
+        clusters_all.push_back(std::move(indices));
 
-    return clusters;
+    for (const auto &cluster : clusters_all)
+    {
+        if (spin_values_vec_[cluster[0]])
+        {
+            clusters_up.push_back(cluster);
+        }
+        else
+        {
+            clusters_down.push_back(cluster);
+        }
+
+        if (is_cluster_percolation(cluster))
+        {
+            clusters_perc.push_back(cluster);
+        }
+    }
+
+    return {clusters_all, clusters_up, clusters_down, clusters_perc};
 }

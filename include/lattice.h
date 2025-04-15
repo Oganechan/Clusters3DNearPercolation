@@ -32,7 +32,7 @@ public:
         return cached_neighbors_;
     }
 
-    std::vector<std::vector<uint32_t>> find_clusters();
+    std::array<std::vector<std::vector<uint32_t>>, 4> find_clusters();
 
 private:
     const uint16_t lattice_size_;
@@ -60,6 +60,7 @@ private:
 
     uint32_t find(uint32_t index);
     void union_clusters(uint32_t a, uint32_t b);
+    bool is_cluster_percolation(const std::vector<uint32_t> &cluster);
 };
 
 #endif
