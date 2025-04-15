@@ -1,4 +1,4 @@
-#include "include/system/lattice.h"
+#include "include/lattice.h"
 
 // Creates a system completely filled with magnetic (1) spins
 void Lattice::initialize()

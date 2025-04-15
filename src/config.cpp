@@ -1,4 +1,4 @@
-#include "include/config/config.h"
+#include "include/config.h"
 
 void Config::load(const std::string &path)
 {
