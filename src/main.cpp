@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <argparse/argparse.hpp>
-#include "include/config/config.h"
-#include "include/system/lattice.h"
+#include "include/config.h"
+#include "include/lattice.h"
 
 int main(int argc, char **argv)
 {
