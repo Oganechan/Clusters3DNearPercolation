@@ -2,12 +2,16 @@
     "lattice": {
         "size": 40,
         "n_layers": 40,
-        "boundary_conditions": "periodic"
+        "boundary_conditions": "hard"
     },
     "simulation": {
         "initial_concentration": 0.0,
         "final_concentration": 1.0,
         "concentration_step": 0.01,
-        "num_configurations": 10000
+        "num_configurations": 500,
+        "num_mc_steps": 5000
+    },
+    "parameters": {
+        "temperature": 0.01
     }
 }
