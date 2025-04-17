@@ -101,38 +101,37 @@ std::vector<std::vector<uint32_t>> Lattice::generate_neighbors() const
 
 bool Lattice::is_cluster_percolation(const std::vector<uint32_t> &cluster)
 {
-    bool percolation_x = false, percolation_y = false, percolation_z = false;
-
-    bool touches_x_min = false, touches_x_max = false;
-    bool touches_y_min = false, touches_y_max = false;
-    bool touches_z_min = false, touches_z_max = false;
-
-    if (cluster.size() < lattice_size_)
+    if (cluster.size() < std::min(n_layers_, lattice_size_))
         return false;
+
+    std::unordered_set<uint16_t> unique_x, unique_y, unique_z;
+
     for (const auto &index : cluster)
     {
         auto [x, y, z] = get_coordinates_via_index(index);
 
-        if (x == 0)
-            touches_x_min = true;
-        else if (x == lattice_size_ - 1)
-            touches_x_max = true;
+        unique_x.insert(x);
+        unique_y.insert(y);
+        unique_z.insert(z);
 
-        if (y == 0)
-            touches_y_min = true;
-        else if (y == lattice_size_ - 1)
-            touches_y_max = true;
+        if (boundary_conditions_)
+        {
+            const bool touches_min_x = (x == 0);
+            const bool touches_max_x = (x == lattice_size_ - 1);
+            if (touches_min_x && touches_max_x)
+                return true;
 
-        if (z == 0)
-            touches_z_min = true;
-        else if (z == n_layers_ - 1)
-            touches_z_max = true;
+            const bool touches_min_y = (y == 0);
+            const bool touches_max_y = (y == lattice_size_ - 1);
+            if (touches_min_y && touches_max_y)
+                return true;
 
-        percolation_x = touches_x_min && touches_x_max;
-        percolation_y = touches_y_min && touches_y_max;
-        percolation_z = touches_z_min && touches_z_max;
-
-        if (percolation_x || percolation_y || percolation_z)
+            const bool touches_min_z = (z == 0);
+            const bool touches_max_z = (z == n_layers_ - 1);
+            if (touches_min_z && touches_max_z)
+                return true;
+        }
+        else if (unique_x.size() == lattice_size_ || unique_z.size() == lattice_size_ || unique_z.size() == n_layers_)
             return true;
     }
     return false;
@@ -161,14 +160,13 @@ void Lattice::union_clusters(uint32_t a, uint32_t b)
     {
         parent_[parent_a] = parent_b;
     }
-    else if (rank_[parent_a > rank_[parent_b]])
-    {
-        parent_[parent_b] = parent_a;
-    }
     else
     {
         parent_[parent_b] = parent_a;
-        ++rank_[parent_a];
+        if (rank_[parent_a] == rank_[parent_b])
+        {
+            rank_[parent_a]++;
+        }
     }
 }
 

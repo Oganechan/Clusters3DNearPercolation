@@ -5,7 +5,9 @@
 #include <array>
 #include <cstdint>
 #include <random>
+#include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 #include "include/config.h"
 
 class Lattice
