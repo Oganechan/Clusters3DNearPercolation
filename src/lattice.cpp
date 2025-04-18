@@ -131,7 +131,7 @@ bool Lattice::is_cluster_percolation(const std::vector<uint32_t> &cluster)
             if (touches_min_z && touches_max_z)
                 return true;
         }
-        else if (unique_x.size() == lattice_size_ || unique_z.size() == lattice_size_ || unique_z.size() == n_layers_)
+        else if (unique_x.size() == lattice_size_ || unique_y.size() == lattice_size_ || unique_z.size() == n_layers_)
             return true;
     }
     return false;
