@@ -1,4 +1,4 @@
-# Clusters 3D Near Percolation
+# Finding 3D Clusters In Diluted Magnets
 
 [![Conference Paper](https://img.shields.io/badge/Conference-Regional%20Scientific%20Conference%202025-blue.svg)](https://www.dvfu.ru/upload/medialibrary/d9c/3xq7x2qlnvvq405fixx2ss58wj9vwg9f/%D1%81%D0%B1%D0%BE%D1%80%D0%BD%D0%B8%D0%BA%20%D0%A0%D0%9D%D0%9F%D0%9A%202025.pdf)
 
